@@ -67,7 +67,7 @@ class SmsTest extends \yii\codeception\TestCase
                 'throwExceptions' => true,
             ]);
             Yii::$app->sms->getBalance();
-        } catch (\miserenkov\sms\BalanceException $e) {
+        } catch (\miserenkov\sms\clients\smsc\BalanceException $e) {
             $caught = true;
         }
 
@@ -100,7 +100,7 @@ class SmsTest extends \yii\codeception\TestCase
                 'throwExceptions' => true,
             ]);
             Yii::$app->sms->send('380501909090', 'Verify code: '.rand());
-        } catch (\miserenkov\sms\SendException $e) {
+        } catch (\miserenkov\sms\clients\smsc\SendException $e) {
             $caught = true;
         }
 
