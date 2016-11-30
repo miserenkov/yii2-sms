@@ -16,7 +16,7 @@ class SmsCTest extends \yii\codeception\TestCase
         try {
             Yii::$app->set('sms', [
                 'class' => '\miserenkov\sms\SmsC',
-                'client' => '',
+                'clientClass' => '',
             ]);
             $sms = Yii::$app->sms;
         } catch (\yii\base\UnknownClassException $e) {
@@ -31,12 +31,35 @@ class SmsCTest extends \yii\codeception\TestCase
         try {
             Yii::$app->set('sms', [
                 'class' => '\miserenkov\sms\SmsC',
-                'client' => '\data\BadClient',
+                'clientClass' => '\data\BadClient',
             ]);
             $sms = Yii::$app->sms;
         } catch (\yii\base\NotSupportedException $e) {
             $caught = true;
         }
         $this->assertTrue($caught, 'Caught not supported exception');
+    }
+
+    public function testGetBalance()
+    {
+        Yii::$app->set('sms', [
+            'class' => '\miserenkov\sms\SmsC',
+            'login' => '',
+            'password' => '',
+            'senderName' => 'testing'
+        ]);
+    }
+
+    public function testCaughtExceptions()
+    {
+        Yii::$app->set('sms', [
+            'class' => '\miserenkov\sms\SmsC',
+            'login' => '',
+            'password' => '',
+            'senderName' => 'testing',
+            'options' => [
+                'throwExceptions' => true,
+            ],
+        ]);
     }
 }

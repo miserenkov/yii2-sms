@@ -9,19 +9,21 @@
 namespace miserenkov\sms;
 
 
-use miserenkov\sms\clients\ClientInterface;
-use yii\base\NotSupportedException;
+use Yii;
 use yii\base\Object;
+use yii\base\NotSupportedException;
 use yii\base\UnknownClassException;
+use miserenkov\sms\clients\ClientInterface;
 
 class SmsC extends Object
 {
+    const TYPE_DEFAULT_MESSAGE = 0;
     const TYPE_REGISTRATION_MESSAGE = 1;
 
     /**
      * @var string
      */
-    public $client = '\miserenkov\sms\clients\SoapClient';
+    public $clientClass = '\miserenkov\sms\clients\SoapClient';
 
     /**
      * @var string
@@ -39,6 +41,11 @@ class SmsC extends Object
     public $senderName = null;
 
     /**
+     * @var bool
+     */
+    public $throwExceptions = false;
+
+    /**
      * @var ClientInterface
      */
     private $_client = null;
@@ -46,15 +53,24 @@ class SmsC extends Object
     public function init()
     {
         if ($this->_client === null) {
-            if (!class_exists(\Yii::getAlias($this->client))) {
-                throw new UnknownClassException("Client class \"$this->client\" not found.");
+            $clientClassName = Yii::getAlias($this->clientClass);
+            if (!class_exists($clientClassName)) {
+                throw new UnknownClassException("Client class \"$clientClassName\" not found.");
             }
 
-            if (!in_array('\miserenkov\sms\clients\ClientInterface', class_implements($this->client))) {
-                throw new NotSupportedException("Class \"$this->client\" not implemented \"\\miserenkov\\sms\\clients\\ClientInterface\"");
+            $interfaceClassName = ClientInterface::class;
+            if (!in_array($interfaceClassName, class_implements($clientClassName))) {
+                throw new NotSupportedException("Class \"$clientClassName\" not implemented \"$interfaceClassName\"");
             }
 
-            $this->_client = new $this->client($this->login, $this->password, $this->senderName, []);
+            $this->_client = Yii::createObject($clientClassName, [
+                $this->login,
+                $this->password,
+                $this->senderName,
+                [
+                    'throwExceptions' => $this->throwExceptions,
+                ],
+            ]);
         }
     }
 
@@ -64,7 +80,8 @@ class SmsC extends Object
     public function allowedTypes()
     {
         return [
-            self::TYPE_REGISTRATION_MESSAGE
+            self::TYPE_DEFAULT_MESSAGE,
+            self::TYPE_REGISTRATION_MESSAGE,
         ];
     }
 
@@ -76,7 +93,34 @@ class SmsC extends Object
         return $this->_client->getBalance();
     }
 
-    public function send($numbers, $message) {
+    /**
+     * Generate random sms identifier
+     * @return string
+     */
+    protected function smsIdGenerator()
+    {
+        return Yii::$app->security->generateRandomString(40);
+    }
 
+    public function send($numbers, $message, $type = self::TYPE_DEFAULT_MESSAGE)
+    {
+        if (!in_array($type, $this->allowedTypes())) {
+            throw new NotSupportedException("Message type \"$type\" doesn't support");
+        }
+        $result = $this->_client->sendMessage([
+            'phones' => $numbers,
+            'message' => $message,
+            'id' => $this->smsIdGenerator(),
+        ]);
+
+        if (count($result) > 0) {
+            foreach ($result as $item) {
+                $item['type'] = $type;
+                $this->setLog($item);
+            }
+            return true;
+        }
+
+        return false;
     }
 }

@@ -24,15 +24,14 @@ interface ClientInterface {
     /**
      * Get user balance on http://sms.ru
      * @throws BalanceException
-     * @return float|false
+     * @return float|bool
      */
     public function getBalance();
 
     /**
-     * @param string|array $numbers
-     * @param string $message
+     * @param array $params
      * @throws SendException
      * @return string
      */
-    public function send($numbers, $message);
+    public function sendMessage(array $params);
 }
