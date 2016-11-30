@@ -9,7 +9,6 @@
 namespace miserenkov\sms;
 
 
-use yii\base\Exception;
 
 class SendException extends Exception
 {
