@@ -75,4 +75,8 @@ class SmsC extends Object
     {
         return $this->_client->getBalance();
     }
+
+    public function send($numbers, $message) {
+
+    }
 }
