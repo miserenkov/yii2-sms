@@ -1,0 +1,25 @@
+{
+    "name": "miserenkov/yii2-sms",
+    "description": "Yii2 component for sending SMS messages",
+    "keywords": ["yii2", "sms", "smsc", "smsc.ru", "smsc.ua"],
+    "type": "yii2-extension",
+    "license": "MIT",
+    "support": {
+        "email": "mi.serenkov@gmail.com",
+        "issues": "https://github.com/miserenkov/yii2-sms/issues",
+        "source": "https://github.com/miserenkov/yii2-sms"
+    },
+    "authors": [
+        {
+            "name": "Misha Serenkov",
+            "email": "mi.serenkov@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "^2.0"
+    },
+    "require-dev": {
+        "codeception/codeception": "^2.2",
+        "yiisoft/yii2-codeception": "^2.0"
+    }
+}
