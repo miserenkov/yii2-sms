@@ -6,9 +6,9 @@
  * Date: 30.11.2016 12:02
  */
 
-namespace miserenkov\sms;
+namespace miserenkov\sms\clients\smsc;
 
-
+use miserenkov\sms\Exception;
 
 class SendException extends Exception
 {

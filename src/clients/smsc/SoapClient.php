@@ -8,10 +8,7 @@
 
 namespace miserenkov\sms\clients\smsc;
 
-
-use miserenkov\sms\BalanceException;
 use miserenkov\sms\clients\ClientInterface;
-use miserenkov\sms\SendException;
 
 class SoapClient extends \SoapClient implements ClientInterface
 {
@@ -50,9 +47,7 @@ class SoapClient extends \SoapClient implements ClientInterface
     }
 
     /**
-     * Get user balance on http://smsc.ru
-     * @return bool|float
-     * @throws BalanceException
+     * @inheritdoc
      */
     public function getBalance()
     {
@@ -120,5 +115,32 @@ class SoapClient extends \SoapClient implements ClientInterface
         }
 
         return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMessageStatus($id, $phone, $all = 2)
+    {
+        $response = $this->get_status([
+            'login' => $this->_login,
+            'psw' => $this->_password,
+            'phone' => $phone,
+            'id' => $id,
+            'all' => $all,
+        ]);
+
+        $response = $response->statusresult;
+
+        return [
+            'time' => (int)$response->send_timestamp,
+            'phone' => $response->phone,
+            'cost' => (double)$response->cost,
+            'operator' => $response->operator,
+            'region' => $response->region,
+            'status' => (int)$response->status,
+            'error' => (int)$response->error,
+            'err' => (int)$response->err,
+        ];
     }
 }

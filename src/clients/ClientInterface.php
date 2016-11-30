@@ -22,7 +22,7 @@ interface ClientInterface {
     public function __construct($login, $password, $senderName, $options = []);
 
     /**
-     * Get user balance on http://sms.ru
+     * Get user balance on http://smsc.ru
      * @throws BalanceException
      * @return float|bool
      */
@@ -34,4 +34,12 @@ interface ClientInterface {
      * @return string
      */
     public function sendMessage(array $params);
+
+    /**
+     * @param string $id
+     * @param string $phone
+     * @param int $all
+     * @return array
+     */
+    public function getMessageStatus($id, $phone, $all = 2);
 }
