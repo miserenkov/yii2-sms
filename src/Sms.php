@@ -15,7 +15,7 @@ use yii\base\NotSupportedException;
 use yii\base\UnknownClassException;
 use miserenkov\sms\clients\ClientInterface;
 
-class SmsC extends Object
+class Sms extends Object
 {
     const TYPE_DEFAULT_MESSAGE = 0;
     const TYPE_REGISTRATION_MESSAGE = 1;
@@ -23,7 +23,7 @@ class SmsC extends Object
     /**
      * @var string
      */
-    public $clientClass = '\miserenkov\sms\clients\SoapClient';
+    public $clientClass = '\miserenkov\sms\clients\smsc\SoapClient';
 
     /**
      * @var string
@@ -102,25 +102,22 @@ class SmsC extends Object
         return Yii::$app->security->generateRandomString(40);
     }
 
+    /**
+     * @param $numbers
+     * @param $message
+     * @param int $type
+     * @return bool|string
+     * @throws NotSupportedException
+     */
     public function send($numbers, $message, $type = self::TYPE_DEFAULT_MESSAGE)
     {
         if (!in_array($type, $this->allowedTypes())) {
             throw new NotSupportedException("Message type \"$type\" doesn't support");
         }
-        $result = $this->_client->sendMessage([
+        return $this->_client->sendMessage([
             'phones' => $numbers,
             'message' => $message,
             'id' => $this->smsIdGenerator(),
         ]);
-
-        if (count($result) > 0) {
-            foreach ($result as $item) {
-                $item['type'] = $type;
-                $this->setLog($item);
-            }
-            return true;
-        }
-
-        return false;
     }
 }

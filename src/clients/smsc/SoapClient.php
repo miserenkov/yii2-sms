@@ -6,10 +6,12 @@
  * Date: 30.11.2016 11:39
  */
 
-namespace miserenkov\sms\clients;
+namespace miserenkov\sms\clients\smsc;
 
 
 use miserenkov\sms\BalanceException;
+use miserenkov\sms\clients\ClientInterface;
+use miserenkov\sms\SendException;
 
 class SoapClient extends \SoapClient implements ClientInterface
 {
@@ -45,8 +47,6 @@ class SoapClient extends \SoapClient implements ClientInterface
         if (isset($options['throwExceptions'])) {
             $this->_throwExceptions = $options['throwExceptions'];
         }
-
-        $this->getBalance();
     }
 
     /**
@@ -65,19 +65,17 @@ class SoapClient extends \SoapClient implements ClientInterface
             $balance = (double)$response->balanceresult->balance;
 
             if (round($balance) == 0) {
+                \Yii::warning(BalanceException::getErrorString(BalanceException::ERROR_NOT_MONEY), self::class);
                 if ($this->_throwExceptions) {
                     throw new BalanceException(BalanceException::ERROR_NOT_MONEY);
-                } else {
-                    \Yii::warning(BalanceException::getErrorString(BalanceException::ERROR_NOT_MONEY), self::class);
                 }
             }
 
             return $balance;
         } else {
+            \Yii::error(BalanceException::getErrorString((int) $response->balanceresult->error), self::class);
             if ($this->_throwExceptions) {
                 throw new BalanceException((int) $response->balanceresult->error);
-            } else {
-                \Yii::error(BalanceException::getErrorString((int) $response->balanceresult->error), self::class);
             }
 
             return false;
@@ -89,6 +87,38 @@ class SoapClient extends \SoapClient implements ClientInterface
      */
     public function sendMessage(array $params)
     {
-        
+        $query = [
+            'login' => $this->_login,
+            'psw' => $this->_password,
+            'sender' => $this->_senderName,
+        ];
+        if (isset($params['phones']) && isset($params['message'])) {
+            if (!isset($params['tinyurl']) || ($params['tinyurl'] != 0 && $params['tinyurl'] != 1)) {
+                $query['tinyurl'] = 1;
+            } else {
+                $query['tinyurl'] = $params['tinyurl'];
+            }
+
+            if (is_array($params['phones'])) {
+                $query['phones'] = implode(';', $params['phones']);
+            } else {
+                $query['phones'] = $params['phones'];
+            }
+            $query['mes'] = $params['message'];
+            $query['id'] = $params['id'];
+
+            $response = $this->send_sms($query);
+
+            if (!isset($response->sendresult->error)) {
+                return $response->sendresult->id;
+            } else {
+                \Yii::error(SendException::getErrorString((int) $response->sendresult->error), self::class);
+                if ($this->_throwExceptions) {
+                    throw new SendException((int) $response->sendresult->error);
+                }
+            }
+        }
+
+        return false;
     }
 }
