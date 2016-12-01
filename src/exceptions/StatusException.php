@@ -39,4 +39,13 @@ class StatusException extends Exception
     {
         return 'StatusException';
     }
+
+    public static function getErrorString($code)
+    {
+        if (isset(static::errors()[$code])) {
+            return static::errors()[$code];
+        } else {
+            return 'Unknown error';
+        }
+    }
 }

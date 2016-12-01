@@ -9,6 +9,7 @@
 namespace miserenkov\sms\client;
 
 use miserenkov\sms\exceptions\BalanceException;
+use miserenkov\sms\exceptions\Exception;
 use miserenkov\sms\exceptions\SendException;
 use miserenkov\sms\exceptions\StatusException;
 
@@ -89,6 +90,7 @@ class SoapClient extends \SoapClient implements ClientInterface
             'psw' => $this->_password,
             'sender' => $this->_senderName,
         ];
+
         if (isset($params['phones']) && isset($params['message'])) {
             if (!isset($params['tinyurl']) || ($params['tinyurl'] != 0 && $params['tinyurl'] != 1)) {
                 $query['tinyurl'] = 1;
@@ -106,12 +108,14 @@ class SoapClient extends \SoapClient implements ClientInterface
 
             $response = $this->send_sms($query);
 
-            if (!isset($response->sendresult->error)) {
-                return $response->sendresult->id;
+            $response = (array) $response->sendresult;
+
+            if (!isset($response['error'])) {
+                return $response['id'];
             } else {
-                \Yii::error(SendException::getErrorString((int) $response->sendresult->error), self::class);
+                \Yii::error(SendException::getErrorString((int) $response['error']), self::class);
                 if ($this->_throwExceptions) {
-                    throw new SendException((int) $response->sendresult->error);
+                    throw new SendException((int) $response['error']);
                 }
             }
         }
@@ -132,17 +136,92 @@ class SoapClient extends \SoapClient implements ClientInterface
             'all' => $all,
         ]);
 
-        $response = $response->statusresult;
+        $response = (array) $response->statusresult;
 
-        return [
-            'time' => (int)$response->send_timestamp,
-            'phone' => $response->phone,
-            'cost' => (double)$response->cost,
-            'operator' => $response->operator,
-            'region' => $response->region,
-            'status' => (int)$response->status,
-            'error' => (int)$response->error,
-            'err' => (int)$response->err,
+        if (count($response) > 0) {
+            if ((int) $response['error'] !== StatusException::NO_ERROR) {
+                \Yii::error(SendException::getErrorString((int) $response['error']), self::class);
+                if ($this->_throwExceptions) {
+                    throw new StatusException((int) $response['error']);
+                }
+                return false;
+            }
+
+            return [
+                'status' => (int) $response['status'],
+                'status_message' => $this->getSendStatus((int) $response['status']),
+                'err' => (int) $response['err'],
+                'err_message' => $this->getSendStatusError((int) $response['err']),
+                'time' => (int) $response['send_timestamp'],
+                'phone' => $response['phone'],
+                'cost' => (float) $response['cost'],
+                'operator' => $response['operator'],
+                'region' => $response['region'],
+            ];
+        } else {
+            \Yii::error(Exception::getErrorString(Exception::EMPTY_RESPONSE), self::class);
+            if ($this->_throwExceptions) {
+                throw new Exception(Exception::EMPTY_RESPONSE);
+            }
+            return false;
+        }
+    }
+
+    private function getSendStatus($code)
+    {
+        $codes = [
+            -3 => 'Сообщение не найдено',
+            -1 => 'Ожидает отправки',
+            0  => 'Передано оператору',
+            1  => 'Доставлено',
+            3  => 'Просрочено',
+            20 => 'Невозможно доставить',
+            22 => 'Неверный номер',
+            23 => 'Запрещено',
+            24 => 'Недостаточно средств',
+            25 => 'Недоступный номер',
         ];
+
+        if (isset($codes[$code])) {
+            return $codes[$code];
+        } else {
+            return 'Unknown status';
+        }
+    }
+
+    private function getSendStatusError($error)
+    {
+        $errors = [
+            0	=> 'Нет ошибки',
+            1	=> 'Абонент не существует',
+            6	=> 'Абонент не в сети',
+            11	=> 'Нет услуги SMS',
+            13	=> 'Абонент заблокирован',
+            21	=> 'Нет поддержки SMS',
+            200	=> 'Виртуальная отправка',
+            220	=> 'Переполнена очередь у оператора',
+            240	=> 'Абонент занят',
+            241	=> 'Ошибка конвертации звука',
+            242	=> 'Зафиксирован автоответчик',
+            243	=> 'Не заключен договор',
+            244	=> 'Рассылки запрещены',
+            245	=> 'Статус не получен',
+            246	=> 'Ограничение по времени',
+            247	=> 'Превышен лимит сообщений',
+            248	=> 'Нет маршрута',
+            249	=> 'Неверный формат номера',
+            250	=> 'Номер запрещен настройками',
+            251	=> 'Превышен лимит на один номер',
+            252	=> 'Номер запрещен',
+            253	=> 'Запрещено спам-фильтром',
+            254	=> 'Незарегистрированный sender id',
+            255	=> 'Отклонено оператором',
+        ];
+
+        if (isset($errors[$error])) {
+            return $errors[$error];
+        } else {
+            return 'Unknown error';
+        }
     }
 }

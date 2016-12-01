@@ -11,6 +11,8 @@ namespace miserenkov\sms\exceptions;
 
 class Exception extends \yii\base\Exception
 {
+    const EMPTY_RESPONSE = 1;
+
     /**
      * Exception constructor.
      * @param string $code
@@ -25,7 +27,9 @@ class Exception extends \yii\base\Exception
      */
     protected static function errors()
     {
-        return [];
+        return [
+            self::EMPTY_RESPONSE => 'Empty response',
+        ];
     }
 
     /**
