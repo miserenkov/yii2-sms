@@ -7,6 +7,13 @@ php:
 - nightly
 - hhvm-3.3
 - hhvm-3.6
+
+matrix:
+    allow_failures:
+        - php: hhvm-3.3
+        - php: hhvm-3.6
+        - php: nightly
+
 install:
     - composer self-update
     - composer global require "fxp/composer-asset-plugin:*"

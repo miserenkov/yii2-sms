@@ -6,9 +6,7 @@
  * Date: 30.11.2016 22:37
  */
 
-namespace miserenkov\sms\clients\smsc;
-
-use miserenkov\sms\Exception;
+namespace miserenkov\sms\exceptions;
 
 class StatusException extends Exception
 {

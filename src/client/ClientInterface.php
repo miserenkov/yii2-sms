@@ -6,23 +6,24 @@
  * Date: 30.11.2016 11:26
  */
 
-namespace miserenkov\sms\clients;
+namespace miserenkov\sms\client;
 
-use miserenkov\sms\BalanceException;
-use miserenkov\sms\SendException;
+use miserenkov\sms\exceptions\BalanceException;
+use miserenkov\sms\exceptions\SendException;
 
 interface ClientInterface {
     /**
      * ClientInterface constructor.
+     * @param string $gateway
      * @param string $login
      * @param string $password
      * @param string $senderName
      * @param array $options
      */
-    public function __construct($login, $password, $senderName, $options = []);
+    public function __construct($gateway, $login, $password, $senderName, $options = []);
 
     /**
-     * Get user balance on http://smsc.ru
+     * Get user balance
      * @throws BalanceException
      * @return float|bool
      */

@@ -9,21 +9,31 @@
 namespace miserenkov\sms;
 
 
+use miserenkov\sms\client\SoapClient;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\base\Object;
 use yii\base\NotSupportedException;
-use yii\base\UnknownClassException;
-use miserenkov\sms\clients\ClientInterface;
 
 class Sms extends Object
 {
+    /**
+     * Api gateways
+     */
+    const GATEWAY_UKRAINE = 'smsc.ua';
+    const GATEWAY_RUSSIA = 'smsc.ru';
+    const GATEWAY_KAZAKHSTAN = 'smsc.kz';
+    const GATEWAY_TAJIKISTAN = 'smsc.tj';
+    const GATEWAY_UZBEKISTAN = 'smsc.uz';
+    const GATEWAY_WORLD = 'smscentre.com';
+
     const TYPE_DEFAULT_MESSAGE = 0;
     const TYPE_REGISTRATION_MESSAGE = 1;
 
     /**
      * @var string
      */
-    public $clientClass = '\miserenkov\sms\clients\smsc\SoapClient';
+    public $gateway = self::GATEWAY_UKRAINE;
 
     /**
      * @var string
@@ -46,24 +56,32 @@ class Sms extends Object
     public $throwExceptions = false;
 
     /**
-     * @var ClientInterface
+     * @var SoapClient
      */
-    private $_client = null;
+    protected $_client = null;
+
+    protected static $_allowedGateways = [
+        self::GATEWAY_UKRAINE,
+        self::GATEWAY_RUSSIA,
+        self::GATEWAY_KAZAKHSTAN,
+        self::GATEWAY_TAJIKISTAN,
+        self::GATEWAY_UZBEKISTAN,
+        self::GATEWAY_WORLD,
+    ];
 
     public function init()
     {
+        if (empty($this->login) || empty($this->password)) {
+            throw new InvalidConfigException('Login and password must be set.');
+        }
+
+        if (!in_array($this->gateway, self::$_allowedGateways)) {
+            throw new InvalidConfigException("Gateway \"$this->gateway\" doesn't support.");
+        }
+
         if ($this->_client === null) {
-            $clientClassName = Yii::getAlias($this->clientClass);
-            if (!class_exists($clientClassName)) {
-                throw new UnknownClassException("Client class \"$clientClassName\" not found.");
-            }
-
-            $interfaceClassName = ClientInterface::class;
-            if (!in_array($interfaceClassName, class_implements($clientClassName))) {
-                throw new NotSupportedException("Class \"$clientClassName\" not implemented \"$interfaceClassName\"");
-            }
-
-            $this->_client = Yii::createObject($clientClassName, [
+            $this->_client = Yii::createObject(SoapClient::class, [
+                $this->gateway,
                 $this->login,
                 $this->password,
                 $this->senderName,
@@ -112,7 +130,7 @@ class Sms extends Object
     public function send($numbers, $message, $type = self::TYPE_DEFAULT_MESSAGE)
     {
         if (!in_array($type, $this->allowedTypes())) {
-            throw new NotSupportedException("Message type \"$type\" doesn't support");
+            throw new NotSupportedException("Message type \"$type\" doesn't support.");
         }
         return $this->_client->sendMessage([
             'phones' => $numbers,

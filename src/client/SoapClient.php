@@ -6,9 +6,11 @@
  * Date: 30.11.2016 11:39
  */
 
-namespace miserenkov\sms\clients\smsc;
+namespace miserenkov\sms\client;
 
-use miserenkov\sms\clients\ClientInterface;
+use miserenkov\sms\exceptions\BalanceException;
+use miserenkov\sms\exceptions\SendException;
+use miserenkov\sms\exceptions\StatusException;
 
 class SoapClient extends \SoapClient implements ClientInterface
 {
@@ -35,9 +37,9 @@ class SoapClient extends \SoapClient implements ClientInterface
     /**
      * @inheritdoc
      */
-    public function __construct($login, $password, $senderName, $options = [])
+    public function __construct($gateway, $login, $password, $senderName, $options = [])
     {
-        parent::__construct('http://smsc.ua/sys/soap.php?wsdl', []);
+        parent::__construct('http://' . $gateway . '/sys/soap.php?wsdl', []);
         $this->_login = $login;
         $this->_password = $password;
         $this->_senderName = $senderName;

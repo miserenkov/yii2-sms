@@ -10,36 +10,118 @@ class SmsTest extends \yii\codeception\TestCase
 {
     public $appConfig = '@tests/unit/_config.php';
 
-    public function testNotFoundClient()
+    public function testEmptyLoginOrPassword()
     {
         $caught = false;
         try {
             Yii::$app->set('sms', [
                 'class' => '\miserenkov\sms\Sms',
-                'clientClass' => '\data\NotFoundClient',
+                'login' => 'phpunit'
             ]);
-            $sms = Yii::$app->sms;
-        } catch (\yii\base\UnknownClassException $e) {
+            Yii::$app->sms;
+        } catch (\yii\base\InvalidConfigException $e) {
+            $this->assertEquals('Login and password must be set.', $e->getMessage());
             $caught = true;
         }
 
-        $this->assertTrue($caught, 'Caught unknown class exception');
+        $this->assertTrue($caught, 'Caught invalid config exception');
+
+        $caught = false;
+        try {
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'password' => '85af727fd022d3a13e7972fd6a418582'
+            ]);
+            Yii::$app->sms;
+        } catch (\yii\base\InvalidConfigException $e) {
+            $this->assertEquals('Login and password must be set.', $e->getMessage());
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, 'Caught invalid config exception');
     }
 
-    public function testBadClient()
+    public function testBadGateway()
     {
         $caught = false;
         try {
             Yii::$app->set('sms', [
                 'class' => '\miserenkov\sms\Sms',
-                'clientClass' => '\data\BadClient',
+                'login' => 'phpunit',
+                'password' => '85af727fd022d3a13e7972fd6a418582',
+                'gateway' => 'smsc.by'
             ]);
-            $sms = Yii::$app->sms;
-        } catch (\yii\base\NotSupportedException $e) {
+            Yii::$app->sms;
+        } catch (\yii\base\InvalidConfigException $e) {
+            $this->assertEquals("Gateway \"smsc.by\" doesn't support.", $e->getMessage());
             $caught = true;
         }
 
         $this->assertTrue($caught, 'Caught not supported exception');
+    }
+
+    public function testBalanceException()
+    {
+        $caught = false;
+        try {
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'login' => 'phpunit',
+                'password' => 'wrong_password',
+                'senderName' => 'PHPUnit',
+                'throwExceptions' => true,
+            ]);
+            Yii::$app->sms->getBalance();
+        } catch (\miserenkov\sms\exceptions\BalanceException $e) {
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, 'Caught balance exception');
+    }
+
+    public function testSendSMSException()
+    {
+        $caught = false;
+        try {
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'login' => 'phpunit',
+                'password' => 'wrong_password',
+                'senderName' => 'PHPUnit',
+                'throwExceptions' => true,
+            ]);
+            Yii::$app->sms->send('380501909090', 'Verify code: '.rand());
+        } catch (\miserenkov\sms\exceptions\SendException $e) {
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, 'Caught send exception');
+    }
+
+    public function testAnotherGateways()
+    {
+        $gateways = [
+            \miserenkov\sms\Sms::GATEWAY_UKRAINE,
+            \miserenkov\sms\Sms::GATEWAY_RUSSIA,
+            \miserenkov\sms\Sms::GATEWAY_KAZAKHSTAN,
+            \miserenkov\sms\Sms::GATEWAY_TAJIKISTAN,
+            \miserenkov\sms\Sms::GATEWAY_UZBEKISTAN,
+            \miserenkov\sms\Sms::GATEWAY_WORLD,
+        ];
+
+        foreach ($gateways as $gateway) {
+            Yii::$app->clear('sms');
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'login' => 'phpunit',
+                'gateway' => $gateway,
+                'password' => '85af727fd022d3a13e7972fd6a418582',
+                'senderName' => 'PHPUnit',
+            ]);
+            $sms_id = Yii::$app->sms->send('380501909090', 'Verify code: '.rand());
+
+            $this->assertTrue(is_string($sms_id) && strlen($sms_id) <= 40, "Sending SMS through the gateway '$gateway' successful");
+        }
     }
 
     public function testGetBalance()
@@ -52,26 +134,7 @@ class SmsTest extends \yii\codeception\TestCase
         $balance = Yii::$app->sms->getBalance();
 
         $this->assertTrue(is_float($balance), 'Balance is float');
-        $this->assertGreaterThanOrEqual(0, $balance, 'Balance greater 0');
-    }
-
-    public function testBalanceException()
-    {
-        $caught = false;
-        try {
-            Yii::$app->set('sms', [
-                'class' => '\miserenkov\sms\Sms',
-                'login' => 'phpunit',
-                'password' => '',
-                'senderName' => 'PHPUnit',
-                'throwExceptions' => true,
-            ]);
-            Yii::$app->sms->getBalance();
-        } catch (\miserenkov\sms\clients\smsc\BalanceException $e) {
-            $caught = true;
-        }
-
-        $this->assertTrue($caught, 'Caught balance exception');
+        $this->assertGreaterThanOrEqual(0, $balance, 'Balance greater or equal 0');
     }
 
     public function testSendSMS()
@@ -85,25 +148,6 @@ class SmsTest extends \yii\codeception\TestCase
         $sms_id = Yii::$app->sms->send('380501909090', 'Verify code: '.rand());
 
         $this->assertTrue(is_string($sms_id), 'Sms id is string');
-        $this->assertTrue(strlen($sms_id) <= 40, 'Sms id less 40 charset');
-    }
-
-    public function testSendSMSException()
-    {
-        $caught = false;
-        try {
-            Yii::$app->set('sms', [
-                'class' => '\miserenkov\sms\Sms',
-                'login' => 'phpunit',
-                'password' => '',
-                'senderName' => 'PHPUnit',
-                'throwExceptions' => true,
-            ]);
-            Yii::$app->sms->send('380501909090', 'Verify code: '.rand());
-        } catch (\miserenkov\sms\clients\smsc\SendException $e) {
-            $caught = true;
-        }
-
-        $this->assertTrue($caught, 'Caught send exception');
+        $this->assertLessThanOrEqual(40, strlen($sms_id), 'Sms id less or equal 40 charset');
     }
 }

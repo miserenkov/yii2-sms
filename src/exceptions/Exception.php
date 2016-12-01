@@ -6,7 +6,7 @@
  * Date: 30.11.2016 15:45
  */
 
-namespace miserenkov\sms;
+namespace miserenkov\sms\exceptions;
 
 
 class Exception extends \yii\base\Exception
@@ -17,7 +17,7 @@ class Exception extends \yii\base\Exception
      */
     public function __construct($code)
     {
-        parent::__construct(self::getErrorString($code), $code);
+        parent::__construct(static::getErrorString($code), $code);
     }
 
     /**
@@ -34,8 +34,8 @@ class Exception extends \yii\base\Exception
      */
     public static function getErrorString($code)
     {
-        if (isset(self::errors()[$code])) {
-            return self::errors()[$code];
+        if (isset(static::errors()[$code])) {
+            return static::errors()[$code];
         } else {
             return 'Unknown error';
         }
