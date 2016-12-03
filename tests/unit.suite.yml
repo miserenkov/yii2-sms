@@ -1,1 +1,7 @@
 class_name: UnitTester
+modules:
+  enabled:
+     - Asserts
+     - Yii2:
+         configFile: 'tests/unit/_config.php'
+         part: [init, orm]

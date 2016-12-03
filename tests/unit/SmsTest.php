@@ -6,10 +6,8 @@
  * Email: mi.serenkov@gmail.com
  * Date: 30.11.2016 11:02
  */
-class SmsTest extends \yii\codeception\TestCase
+class SmsTest extends Codeception\Test\Unit
 {
-    public $appConfig = '@tests/unit/_config.php';
-
     public function testEmptyLoginOrPassword()
     {
         $caught = false;
