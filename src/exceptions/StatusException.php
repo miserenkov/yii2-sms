@@ -23,12 +23,12 @@ class StatusException extends Exception
     protected static function errors()
     {
         return [
-            self::NO_ERROR => 'Ошибок нет',
-            self::ERROR_INVALID_PARAMS => 'Ошибка в параметрах',
-            self::ERROR_WRONG_LOGIN_OR_PASSWORD => 'Неверный логин или пароль',
-            self::ERROR_MESSAGE_NOT_FOUND => 'Сообщение не найдено',
-            self::ERROR_IP_BANNED => 'IP-адрес временно заблокирован',
-            self::ERROR_API_CALL_LIMIT => 'Превышен лимит запросов в течение минуты',
+            self::NO_ERROR                      => 'There are no errors',
+            self::ERROR_INVALID_PARAMS          => 'Error in the parameters',
+            self::ERROR_WRONG_LOGIN_OR_PASSWORD => 'Invalid username or password',
+            self::ERROR_MESSAGE_NOT_FOUND       => 'The message is not found',
+            self::ERROR_IP_BANNED               => 'IP address is temporarily blocked',
+            self::ERROR_API_CALL_LIMIT          => 'You have exceeded the limit of requests within minutes',
         ];
     }
 

@@ -69,7 +69,9 @@ class SmsTest extends \yii\codeception\TestCase
                 'login' => 'phpunit',
                 'password' => 'wrong_password',
                 'senderName' => 'PHPUnit',
-                'throwExceptions' => true,
+                'options' => [
+                    'throwExceptions' => true,
+                ],
             ]);
             Yii::$app->sms->getBalance();
         } catch (\miserenkov\sms\exceptions\BalanceException $e) {
@@ -79,7 +81,7 @@ class SmsTest extends \yii\codeception\TestCase
         $this->assertTrue($caught, 'Caught balance exception');
     }
 
-    public function testSendSMSException()
+    public function testSendException()
     {
         $caught = false;
         try {
@@ -88,7 +90,9 @@ class SmsTest extends \yii\codeception\TestCase
                 'login' => 'phpunit',
                 'password' => 'wrong_password',
                 'senderName' => 'PHPUnit',
-                'throwExceptions' => true,
+                'options' => [
+                    'throwExceptions' => true,
+                ]
             ]);
             Yii::$app->sms->send('380501909090', 'Verify code: '.rand());
         } catch (\miserenkov\sms\exceptions\SendException $e) {
@@ -96,6 +100,27 @@ class SmsTest extends \yii\codeception\TestCase
         }
 
         $this->assertTrue($caught, 'Caught send exception');
+    }
+
+    public function testStatusException()
+    {
+        $caught = false;
+        try {
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'login' => 'phpunit',
+                'password' => 'wrong_password',
+                'senderName' => 'PHPUnit',
+                'options' => [
+                    'throwExceptions' => true,
+                ],
+            ]);
+            Yii::$app->sms->getStatus('iVa6QswMhPYoEDci7-gnOS2QmCFBZAxZmf6hge95', '380501909090');
+        } catch (\miserenkov\sms\exceptions\StatusException $e) {
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, 'Caught status exception');
     }
 
     public function testAnotherGateways()
@@ -149,5 +174,40 @@ class SmsTest extends \yii\codeception\TestCase
 
         $this->assertTrue(is_string($sms_id), 'Sms id is string');
         $this->assertLessThanOrEqual(40, strlen($sms_id), 'Sms id less or equal 40 charset');
+    }
+
+    public function testGetMessageStatus()
+    {
+        Yii::$app->set('sms', [
+            'class' => '\miserenkov\sms\Sms',
+            'login' => 'phpunit',
+            'password' => '85af727fd022d3a13e7972fd6a418582',
+            'senderName' => 'PHPUnit',
+        ]);
+        $status = Yii::$app->sms->getStatus('iVa6QswMhPYoEDci7-gnOS2QmCFBZAxZmf6hge95', '380501909090');
+
+        $this->assertArrayHasKey('status', $status);
+        $this->assertTrue(is_int($status['status']));
+
+        $this->assertArrayHasKey('status_message', $status);
+        $this->assertTrue(is_string($status['status_message']));
+
+        $this->assertArrayHasKey('err', $status);
+        $this->assertTrue(is_int($status['err']));
+
+        $this->assertArrayHasKey('err_message', $status);
+        $this->assertTrue(is_string($status['err_message']));
+
+        $this->assertArrayHasKey('time', $status);
+        $this->assertTrue(is_int($status['time']));
+
+        $this->assertArrayHasKey('cost', $status);
+        $this->assertTrue(is_double($status['cost']));
+
+        $this->assertArrayHasKey('operator', $status);
+        $this->assertTrue(is_string($status['operator']));
+
+        $this->assertArrayHasKey('region', $status);
+        $this->assertTrue(is_string($status['region']));
     }
 }

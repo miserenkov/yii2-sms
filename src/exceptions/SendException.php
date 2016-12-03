@@ -27,16 +27,16 @@ class SendException extends Exception
     protected static function errors()
     {
         return [
-            self::NO_ERROR => 'Ошибок нет',
-            self::ERROR_INVALID_PARAMS => 'Ошибка в параметрах',
-            self::ERROR_WRONG_LOGIN_OR_PASSWORD => 'Неверный логин или пароль',
-            self::ERROR_NOT_MONEY => 'Недостаточно средств на счете Клиента',
-            self::ERROR_IP_BANNED => 'IP-адрес временно заблокирован',
-            self::ERROR_INVALID_DATE => 'Неверный формат даты',
-            self::ERROR_MESSAGE_BLOCKED => 'Сообщение запрещено',
-            self::ERROR_INVALID_PHONE_NUMBER => 'Неверный формат номера телефона',
-            self::ERROR_MESSAGE_NOT_DELIVERED => 'Сообщение на указанный номер не может быть доставлено',
-            self::ERROR_API_CALL_LIMIT => 'Отправка более одного одинакового запроса в течение минуты запрещена',
+            self::NO_ERROR                      => 'There are no errors',
+            self::ERROR_INVALID_PARAMS          => 'Error in the parameters',
+            self::ERROR_WRONG_LOGIN_OR_PASSWORD => 'Invalid username or password',
+            self::ERROR_NOT_MONEY               => 'Insufficient funds in the Customer\'s account',
+            self::ERROR_IP_BANNED               => 'IP address is temporarily blocked',
+            self::ERROR_INVALID_DATE            => 'Wrong date format',
+            self::ERROR_MESSAGE_BLOCKED         => 'The message is prohibited',
+            self::ERROR_INVALID_PHONE_NUMBER    => 'Invalid phone number format',
+            self::ERROR_MESSAGE_NOT_DELIVERED   => 'The message to the specified number can not be delivered',
+            self::ERROR_API_CALL_LIMIT          => 'Sending more than one identical request within minutes is prohibited',
         ];
     }
 

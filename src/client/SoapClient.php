@@ -12,6 +12,7 @@ use miserenkov\sms\exceptions\BalanceException;
 use miserenkov\sms\exceptions\Exception;
 use miserenkov\sms\exceptions\SendException;
 use miserenkov\sms\exceptions\StatusException;
+use yii\base\InvalidConfigException;
 
 class SoapClient extends \SoapClient implements ClientInterface
 {
@@ -40,13 +41,45 @@ class SoapClient extends \SoapClient implements ClientInterface
      */
     public function __construct($gateway, $login, $password, $senderName, $options = [])
     {
-        parent::__construct('http://' . $gateway . '/sys/soap.php?wsdl', []);
+        $https = true;
         $this->_login = $login;
         $this->_password = $password;
         $this->_senderName = $senderName;
         if (isset($options['throwExceptions'])) {
             $this->_throwExceptions = $options['throwExceptions'];
         }
+        if (isset($options['useHttps']) && is_bool($options['useHttps'])) {
+            $https = $options['useHttps'];
+        }
+        parent::__construct($this->getWsdl($gateway, $https), []);
+    }
+
+    private function getWsdl($gateway, $useHttps = true)
+    {
+        $httpsWsdl = 'https://' . $gateway . '/sys/soap.php?wsdl';
+        $httpWsdl = 'http://' . $gateway . '/sys/soap.php?wsdl';
+
+        if ($useHttps) {
+            $ch = curl_init($httpsWsdl);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $errorCode = curl_errno($ch);
+            curl_close($ch);
+
+            if ($errorCode === CURLE_OK && $httpCode === 200) {
+                return $httpsWsdl;
+            }
+            \Yii::warning("Gateway \"$gateway\" doesn't support https connections. Will use http", self::class);
+            if ($this->_throwExceptions) {
+                throw new InvalidConfigException("Gateway \"$gateway\" doesn't support https connections. Will use http");
+            }
+        }
+
+        return $httpWsdl;
     }
 
     /**
@@ -153,7 +186,6 @@ class SoapClient extends \SoapClient implements ClientInterface
                 'err' => (int) $response['err'],
                 'err_message' => $this->getSendStatusError((int) $response['err']),
                 'time' => (int) $response['send_timestamp'],
-                'phone' => $response['phone'],
                 'cost' => (float) $response['cost'],
                 'operator' => $response['operator'],
                 'region' => $response['region'],
@@ -170,16 +202,16 @@ class SoapClient extends \SoapClient implements ClientInterface
     private function getSendStatus($code)
     {
         $codes = [
-            -3 => 'Сообщение не найдено',
-            -1 => 'Ожидает отправки',
-            0  => 'Передано оператору',
-            1  => 'Доставлено',
-            3  => 'Просрочено',
-            20 => 'Невозможно доставить',
-            22 => 'Неверный номер',
-            23 => 'Запрещено',
-            24 => 'Недостаточно средств',
-            25 => 'Недоступный номер',
+            -3 => 'The message is not found',
+            -1 => 'Waiting to be sent',
+            0  => 'Transferred to the operator',
+            1  => 'Delivered',
+            3  => 'Expired',
+            20 => 'It is impossible to deliver',
+            22 => 'Wrong number',
+            23 => 'Prohibited',
+            24 => 'Insufficient funds',
+            25 => 'Unavailable number',
         ];
 
         if (isset($codes[$code])) {
@@ -192,30 +224,30 @@ class SoapClient extends \SoapClient implements ClientInterface
     private function getSendStatusError($error)
     {
         $errors = [
-            0	=> 'Нет ошибки',
-            1	=> 'Абонент не существует',
-            6	=> 'Абонент не в сети',
-            11	=> 'Нет услуги SMS',
-            13	=> 'Абонент заблокирован',
-            21	=> 'Нет поддержки SMS',
-            200	=> 'Виртуальная отправка',
-            220	=> 'Переполнена очередь у оператора',
-            240	=> 'Абонент занят',
-            241	=> 'Ошибка конвертации звука',
-            242	=> 'Зафиксирован автоответчик',
-            243	=> 'Не заключен договор',
-            244	=> 'Рассылки запрещены',
-            245	=> 'Статус не получен',
-            246	=> 'Ограничение по времени',
-            247	=> 'Превышен лимит сообщений',
-            248	=> 'Нет маршрута',
-            249	=> 'Неверный формат номера',
-            250	=> 'Номер запрещен настройками',
-            251	=> 'Превышен лимит на один номер',
-            252	=> 'Номер запрещен',
-            253	=> 'Запрещено спам-фильтром',
-            254	=> 'Незарегистрированный sender id',
-            255	=> 'Отклонено оператором',
+            0	=> 'There are no errors',
+            1	=> 'The subscriber does not exist',
+            6	=> 'The subscriber is not online',
+            11	=> 'No SMS',
+            13	=> 'The subscriber is blocked',
+            21	=> 'There is no support for SMS',
+            200	=> 'Virtual dispatch',
+            220	=> 'Queue overflowed from the operator',
+            240	=> 'Subscriber is busy',
+            241	=> 'Error converting audio',
+            242	=> 'Recorded answering machine',
+            243	=> 'Not a contract',
+            244	=> 'Distribution is prohibited',
+            245	=> 'Status is not received',
+            246	=> 'A time limit',
+            247	=> 'Limit exceeded messages',
+            248	=> 'There is no route',
+            249	=> 'Invalid number format',
+            250	=> 'The phone number of prohibited settings',
+            251	=> 'Limit is exceeded on a single number',
+            252	=> 'Phone number is prohibited',
+            253	=> 'Prohibited spam filter',
+            254	=> 'Unregistered sender id',
+            255	=> 'Rejected by the operator',
         ];
 
         if (isset($errors[$error])) {
