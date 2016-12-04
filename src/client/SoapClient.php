@@ -185,7 +185,7 @@ class SoapClient extends \SoapClient implements ClientInterface
                 'status_message' => $this->getSendStatus((int) $response['status']),
                 'err' => (int) $response['err'],
                 'err_message' => $this->getSendStatusError((int) $response['err']),
-                'time' => (int) $response['send_timestamp'],
+                'send_time' => (int) $response['send_timestamp'],
                 'cost' => (float) $response['cost'],
                 'operator' => $response['operator'],
                 'region' => $response['region'],

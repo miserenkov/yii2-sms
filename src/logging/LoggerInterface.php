@@ -1,15 +1,14 @@
 <?php
-
 /**
  * Created by PhpStorm.
  * Author: Misha Serenkov
  * Email: mi.serenkov@gmail.com
- * Date: 30.11.2016 11:48
+ * Date: 03.12.2016 23:07
  */
 
-namespace data;
+namespace miserenkov\sms\logging;
 
-class BadClient
+interface LoggerInterface
 {
 
 }

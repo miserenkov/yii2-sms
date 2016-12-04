@@ -55,7 +55,15 @@ class Sms extends Object
     /**
      * @var array
      */
-    public $options = [];
+    public $options = [
+        'useHttps' => true,
+        'throwExceptions' => false,
+    ];
+
+    /**
+     * @var array|false
+     */
+    public $logging = false;
 
     /**
      * @var SoapClient
@@ -110,6 +118,12 @@ class Sms extends Object
                 $this->senderName,
                 $this->options,
             ]);
+        }
+
+        if ($this->logging) {
+            if (!isset($this->logging['class']) || !isset($this->logging['connection'])) {
+                throw new InvalidConfigException('Class and connection must be set.');
+            }
         }
     }
 

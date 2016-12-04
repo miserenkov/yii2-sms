@@ -6,7 +6,7 @@
  * Email: mi.serenkov@gmail.com
  * Date: 30.11.2016 11:02
  */
-class SmsTest extends Codeception\Test\Unit
+class ComponentTest extends Codeception\Test\Unit
 {
     public function testEmptyLoginOrPassword()
     {
@@ -196,8 +196,8 @@ class SmsTest extends Codeception\Test\Unit
         $this->assertArrayHasKey('err_message', $status);
         $this->assertTrue(is_string($status['err_message']));
 
-        $this->assertArrayHasKey('time', $status);
-        $this->assertTrue(is_int($status['time']));
+        $this->assertArrayHasKey('send_time', $status);
+        $this->assertTrue(is_int($status['send_time']));
 
         $this->assertArrayHasKey('cost', $status);
         $this->assertTrue(is_double($status['cost']));
