@@ -18,13 +18,15 @@ services:
   - mongodb
   - redis-server
 
+before_install:
+  - echo "extension = mongo.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - mongo mydb_test --eval 'db.addUser("travis", "test");'
+
 install:
   - composer self-update
   - composer global require "fxp/composer-asset-plugin:*"
   - composer install
   - php vendor/codeception/codeception/codecept build
-
-before_script:
-  - mongo mydb_test --eval 'db.addUser("travis", "test");'
 
 script: php vendor/codeception/codeception/codecept run
