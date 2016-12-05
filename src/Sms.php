@@ -127,13 +127,14 @@ class Sms extends Object
             ]);
         }
 
-        if ($this->logging && $this->_logger = null) {
+        if ($this->logging && $this->_logger === null) {
             if (!isset($this->logging['connection'])) {
                 throw new InvalidConfigException('Logging connection must be set.');
             }
             if (!isset($this->logging['class']) || empty($this->logging['class'])) {
                 $this->logging['class'] = Logger::class;
             }
+
             $this->_logger = Yii::createObject($this->logging);
         }
     }

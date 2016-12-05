@@ -13,5 +13,15 @@ use yii\redis\ActiveRecord;
 
 class Redis extends ActiveRecord
 {
+    public static $db;
 
+    public function setDb($connection)
+    {
+        static::$db = $connection;
+    }
+
+    public static function getDb()
+    {
+        return static::$db;
+    }
 }
