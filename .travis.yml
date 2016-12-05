@@ -14,9 +14,17 @@ matrix:
         - php: hhvm-3.6
         - php: nightly
 
+services:
+  - mongodb
+  - redis-server
+
 install:
-    - composer self-update
-    - composer global require "fxp/composer-asset-plugin:*"
-    - composer install
-    - php vendor/codeception/codeception/codecept build
+  - composer self-update
+  - composer global require "fxp/composer-asset-plugin:*"
+  - composer install
+  - php vendor/codeception/codeception/codecept build
+
+before_script:
+  - mongo mydb_test --eval 'db.addUser("travis", "test");'
+
 script: php vendor/codeception/codeception/codecept run
