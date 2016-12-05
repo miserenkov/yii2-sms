@@ -25,7 +25,7 @@ class Logger extends Object implements LoggerInterface
 
     public function init()
     {
-
+        
     }
 
     public function getTableName()

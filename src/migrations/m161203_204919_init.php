@@ -11,6 +11,9 @@ class m161203_204919_init extends Migration
          * @var \miserenkov\sms\logging\Logger $logger
          */
         $logger = Yii::$app->sms->getLogger();
+        if ($logger === false) {
+            throw new Exception('Logger must be set');
+        }
         $this->tableName = $logger->getTableName();
         $this->db = $logger->getConnection();
     }
