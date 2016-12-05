@@ -9,18 +9,18 @@ php:
 - hhvm-3.6
 
 matrix:
-    allow_failures:
-        - php: hhvm-3.3
-        - php: hhvm-3.6
-        - php: nightly
+  allow_failures:
+    - php: hhvm-3.3
+    - php: hhvm-3.6
+    - php: nightly
 
 services:
   - mongodb
   - redis-server
 
 before_install:
-  - echo "extension = mongo.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - pecl install -f mongo-1.2.0
+  - pecl install -f redis-3.0.0
   - mongo mydb_test --eval 'db.addUser("travis", "test");'
 
 install:
