@@ -14,6 +14,7 @@ use yii\base\Object;
 use yii\db\BaseActiveRecord;
 use yii\di\Instance;
 use yii\db\Connection as SqlConnection;
+use yii\helpers\VarDumper;
 use yii\mongodb\Connection as MongoConnection;
 use yii\redis\Connection as RedisConnection;
 use miserenkov\sms\logging\models\Sql;
@@ -70,11 +71,13 @@ class Logger extends Object implements LoggerInterface
     {
         $record = new $this->_model();
         $record->setDb($this->connection);
+        $record->setTableName($this->tableName);
         foreach ($data as $key => $value) {
             if ($record->hasAttribute($key)) {
                 $record->$key = $value;
             }
         }
+
         return $record->save();
     }
 
@@ -86,7 +89,8 @@ class Logger extends Object implements LoggerInterface
         if (!empty($sms_id)) {
             $record = new $this->_model();
             $record->setDb($this->connection);
-            $record->findOne(['sms_id' => $sms_id]);
+            $record->setTableName($this->tableName);
+            $record = $record->findOne(['sms_id' => $sms_id]);
             if ($record instanceof BaseActiveRecord) {
                 foreach ($data as $key => $value) {
                     if ($record->hasAttribute($key)) {
@@ -109,7 +113,8 @@ class Logger extends Object implements LoggerInterface
         if (!empty($sms_id)) {
             $record = new $this->_model();
             $record->setDb($this->connection);
-            $record->findOne(['sms_id' => $sms_id, 'phone' => $phone]);
+            $record->setTableName($this->tableName);
+            $record = $record->findOne(['sms_id' => $sms_id, 'phone' => $phone]);
             if ($record instanceof BaseActiveRecord) {
                 foreach ($data as $key => $value) {
                     if ($record->hasAttribute($key)) {

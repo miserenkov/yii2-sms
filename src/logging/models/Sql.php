@@ -15,6 +15,8 @@ class Sql extends ActiveRecord
 {
     public static $db;
 
+    public static $tableName;
+
     public function setDb($connection)
     {
         static::$db = $connection;
@@ -23,5 +25,15 @@ class Sql extends ActiveRecord
     public static function getDb()
     {
         return static::$db;
+    }
+
+    public static function tableName()
+    {
+        return static::$tableName;
+    }
+
+    public static function setTableName($tableName)
+    {
+        static::$tableName = $tableName;
     }
 }

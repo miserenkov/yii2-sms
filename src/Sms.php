@@ -180,11 +180,31 @@ class Sms extends Object
             throw new \InvalidArgumentException('For sending sms, please, set phone number and message');
         }
 
-        return $this->_client->sendMessage([
+        $sms_id = $this->_client->sendMessage([
             'phones' => $numbers,
             'message' => $message,
             'id' => $this->smsIdGenerator(),
         ]);
+
+        if ($this->_logger instanceof LoggerInterface) {
+            if (is_array($numbers)) {
+                foreach ($numbers as $number) {
+                    $this->_logger->setRecord([
+                        'sms_id' => !$sms_id ? '' : $sms_id,
+                        'phone' => $number,
+                        'message' => $message,
+                    ]);
+                }
+            } else {
+                $this->_logger->setRecord([
+                    'sms_id' => !$sms_id ? '' : $sms_id,
+                    'phone' => $numbers,
+                    'message' => $message,
+                ]);
+            }
+        }
+
+        return $sms_id;
     }
 
     /**
@@ -202,7 +222,13 @@ class Sms extends Object
             throw new \InvalidArgumentException('For getting sms status, please, set id and phone');
         }
 
-        return $this->_client->getMessageStatus($id, $phone, $all);
+        $data = $this->_client->getMessageStatus($id, $phone, $all);
+
+        if ($this->_logger instanceof LoggerInterface) {
+            $this->_logger->updateRecordBySmsIdAndPhone($id, $phone, $data);
+        }
+
+        return $data;
     }
 
     public function getLogger()
