@@ -22,11 +22,7 @@ services:
 
 before_install:
   - mysql -u root -e "CREATE DATABASE travis_test;"
-  - mysql -u root -e "CREATE USER 'travis'@'localhost' IDENTIFIED BY 'test';"
-  - mysql -u root -e "GRANT ALL ON travis_test.* TO 'travis'@'localhost';"
   - psql -c "CREATE DATABASE travis_test;" -U postgres
-  - psql -c "CREATE USER travis WITH password 'test';" -U postgres
-  - psql -c "GRANT ALL privileges ON DATABASE travis_test TO travis;" -U postgres
   - pecl install -f mongodb-1.2.0
   - pecl install -f redis-3.0.0
   - mongo travis_test --eval 'db.addUser("travis", "test");'

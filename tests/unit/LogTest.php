@@ -17,9 +17,9 @@ class LogTest extends \Codeception\Test\Unit
     {
         Yii::$app->set('db', [
             'class' => '\yii\db\Connection',
-            'dsn' => 'mysql:host=localhost;dbname=travis_test',
+            'dsn' => 'mysql:host=127.0.0.1;dbname=travis_test',
             'username' => 'travis',
-            'password' => 'test',
+            'password' => '',
             'charset' => 'utf8',
         ]);
         Yii::$app->set('sms', [
@@ -29,9 +29,9 @@ class LogTest extends \Codeception\Test\Unit
             'logging' => [
                 'connection' => [
                     'class' => '\yii\db\Connection',
-                    'dsn' => 'mysql:host=localhost;dbname=travis_test',
+                    'dsn' => 'mysql:host=127.0.0.1;dbname=travis_test',
                     'username' => 'travis',
-                    'password' => 'test',
+                    'password' => '',
                     'charset' => 'utf8',
                 ],
             ],
@@ -47,9 +47,9 @@ class LogTest extends \Codeception\Test\Unit
 
         Yii::$app->set('db', [
             'class' => '\yii\db\Connection',
-            'dsn' => 'pgsql:host=localhost;dbname=travis_test',
-            'username' => 'travis',
-            'password' => 'test',
+            'dsn' => 'pgsql:host=127.0.0.1;dbname=travis_test',
+            'username' => 'postgres',
+            'password' => '',
             'charset' => 'utf8',
         ]);
         Yii::$app->set('sms', [
@@ -59,9 +59,9 @@ class LogTest extends \Codeception\Test\Unit
             'logging' => [
                 'connection' => [
                     'class' => '\yii\db\Connection',
-                    'dsn' => 'pgsql:host=localhost;dbname=travis_test',
-                    'username' => 'travis',
-                    'password' => 'test',
+                    'dsn' => 'pgsql:host=127.0.0.1;dbname=travis_test',
+                    'username' => 'postgres',
+                    'password' => '',
                     'charset' => 'utf8',
                 ],
             ],
@@ -83,7 +83,7 @@ class LogTest extends \Codeception\Test\Unit
             'logging' => [
                 'connection' => [
                     'class' => '\yii\mongodb\Connection',
-                    'dsn' => 'mongodb://travis:test@localhost:27017/travis_test',
+                    'dsn' => 'mongodb://travis:test@127.0.0.1:27017/travis_test',
                 ],
             ],
         ]);
@@ -96,7 +96,7 @@ class LogTest extends \Codeception\Test\Unit
             'logging' => [
                 'connection' => [
                     'class' => '\yii\redis\Connection',
-                    'hostname' => 'localhost',
+                    'hostname' => '127.0.0.1',
                     'port' => 6379,
                     'database' => 0,
                 ],
@@ -109,9 +109,9 @@ class LogTest extends \Codeception\Test\Unit
     {
         Yii::$app->set('mysql_db', [
             'class' => '\yii\db\Connection',
-            'dsn' => 'mysql:host=127.0.0.1;dbname=phpunit',
-            'username' => 'phpunit',
-            'password' => 'phpunit',
+            'dsn' => 'mysql:host=127.0.0.1;dbname=travis_test',
+            'username' => 'travis',
+            'password' => '',
             'charset' => 'utf8',
         ]);
         Yii::$app->set('sms', [
@@ -126,9 +126,9 @@ class LogTest extends \Codeception\Test\Unit
 
         Yii::$app->set('pgsql_db', [
             'class' => '\yii\db\Connection',
-            'dsn' => 'pgsql:host=127.0.0.1;dbname=phpunit',
-            'username' => 'phpunit',
-            'password' => 'phpunit',
+            'dsn' => 'pgsql:host=127.0.0.1;dbname=travis_test',
+            'username' => 'postgres',
+            'password' => '',
             'charset' => 'utf8',
         ]);
         Yii::$app->set('sms', [
@@ -143,7 +143,7 @@ class LogTest extends \Codeception\Test\Unit
 
         Yii::$app->set('mongo_db', [
             'class' => '\yii\mongodb\Connection',
-            'dsn' => 'mongodb://phpunit:phpunit@localhost:27017/phpunit',
+            'dsn' => 'mongodb://travis:test@127.0.0.1:27017/travis_test',
         ]);
         Yii::$app->set('sms', [
             'class' => '\miserenkov\sms\Sms',
@@ -157,7 +157,7 @@ class LogTest extends \Codeception\Test\Unit
 
         Yii::$app->set('redis_db', [
             'class' => '\yii\redis\Connection',
-            'hostname' => 'localhost',
+            'hostname' => '127.0.0.1',
             'port' => 6379,
             'database' => 0,
         ]);
