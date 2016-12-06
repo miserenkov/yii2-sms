@@ -208,4 +208,61 @@ class ComponentTest extends Codeception\Test\Unit
         $this->assertArrayHasKey('region', $status);
         $this->assertTrue(is_string($status['region']));
     }
+
+    public function testFailedGetStatus()
+    {
+        $caught = false;
+        try {
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'login' => 'phpunit',
+                'password' => '85af727fd022d3a13e7972fd6a418582',
+                'senderName' => 'PHPUnit',
+                'options' => [
+                    'throwExceptions' => true,
+                ],
+            ]);
+            Yii::$app->sms->getStatus('iVa6QswMhPYoEDci7-gnOS2QmCFBZAxZmf6hge95', null);
+        } catch (\InvalidArgumentException $e) {
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, 'Caught invalid argument exception');
+    }
+
+    public function testFailedSendSMS()
+    {
+        $caught = false;
+        try {
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'login' => 'phpunit',
+                'password' => '85af727fd022d3a13e7972fd6a418582',
+                'senderName' => 'PHPUnit',
+            ]);
+            $sms_id = Yii::$app->sms->send('380501909090', null);
+        } catch (\InvalidArgumentException $e) {
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, 'Caught invalid argument exception');
+    }
+
+    public function testSendNotSupportedSMSType()
+    {
+        $caught = false;
+        try {
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'login' => 'phpunit',
+                'password' => '85af727fd022d3a13e7972fd6a418582',
+                'senderName' => 'PHPUnit',
+            ]);
+            $sms_id = Yii::$app->sms->send('380501909090', 'Verify code: '.rand(), 9);
+        } catch (\yii\base\NotSupportedException $e) {
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, 'Caught not supported exception');
+    }
 }

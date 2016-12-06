@@ -40,20 +40,16 @@ class Logger extends Object implements LoggerInterface
 
     public function init()
     {
-        if (empty($this->connection)) {
-            throw new InvalidConfigException('');
-        } else {
-            $this->connection = Instance::ensure($this->connection);
+        $this->connection = Instance::ensure($this->connection);
 
-            if ($this->connection instanceof SqlConnection) {
-                $this->_model = Sql::class;
-            } elseif ($this->connection instanceof MongoConnection) {
-                $this->_model = Mongo::class;
-            } elseif ($this->connection instanceof RedisConnection) {
-                $this->_model = Redis::class;
-            } else {
-                throw new InvalidConfigException('');
-            }
+        if ($this->connection instanceof SqlConnection) {
+            $this->_model = Sql::class;
+        } elseif ($this->connection instanceof MongoConnection) {
+            $this->_model = Mongo::class;
+        } elseif ($this->connection instanceof RedisConnection) {
+            $this->_model = Redis::class;
+        } else {
+            throw new InvalidConfigException('');
         }
     }
 

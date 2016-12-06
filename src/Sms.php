@@ -128,7 +128,10 @@ class Sms extends Object
         }
 
         if ($this->logging && $this->_logger === null) {
-            if (!isset($this->logging['connection'])) {
+            if (
+                !isset($this->logging['connection']) || empty($this->logging['connection']) ||
+                (is_array($this->logging['connection']) && count($this->logging['connection']) === 0)
+            ) {
                 throw new InvalidConfigException('Logging connection must be set.');
             }
             if (!isset($this->logging['class']) || empty($this->logging['class'])) {
