@@ -194,38 +194,38 @@ class LogTest extends \Codeception\Test\Unit
         $this->assertInstanceOf(\yii\redis\Connection::class, Yii::$app->sms->getLogger()->connection);
     }
 
-    public function testWriteAndReadRedisLog()
-    {
-        $sms = [];
-        Yii::$app->set('redis', [
-            'class' => '\yii\redis\Connection',
-            'hostname' => '127.0.0.1',
-            'port' => 6379,
-            'database' => 0,
-        ]);
-        Yii::$app->set('sms', [
-            'class' => '\miserenkov\sms\Sms',
-            'login' => 'phpunit',
-            'password' => '85af727fd022d3a13e7972fd6a418582',
-            'logging' => [
-                'connection' => 'redis',
-            ],
-        ]);
-
-        for ($i = 0; $i < 10; $i++) {
-            $phone = sprintf('%s',rand(38050000000, 380509999999));
-            $message = 'Verify code: '.rand();
-            $sms_id = Yii::$app->sms->send($phone, $message);
-            $sms[] = ['phone' => $phone, 'sms_id' => $sms_id];
-        }
-
-        foreach ($sms as $oneSms) {
-            if (is_string($oneSms['sms_id']) && strlen($oneSms['sms_id']) > 0) {
-                $status = Yii::$app->sms->getStatus($oneSms['sms_id'], $oneSms['phone']);
-                $this->tester->seeRecord('data\RedisModel', ['sms_id' => $oneSms['sms_id'], 'phone' => $oneSms['phone']]);
-            }
-        }
-    }
+//    public function testWriteAndReadRedisLog()
+//    {
+//        $sms = [];
+//        Yii::$app->set('redis', [
+//            'class' => '\yii\redis\Connection',
+//            'hostname' => '127.0.0.1',
+//            'port' => 6379,
+//            'database' => 0,
+//        ]);
+//        Yii::$app->set('sms', [
+//            'class' => '\miserenkov\sms\Sms',
+//            'login' => 'phpunit',
+//            'password' => '85af727fd022d3a13e7972fd6a418582',
+//            'logging' => [
+//                'connection' => 'redis',
+//            ],
+//        ]);
+//
+//        for ($i = 0; $i < 10; $i++) {
+//            $phone = sprintf('%s', rand(38050000000, 380509999999));
+//            $message = 'Verify code: ' . rand();
+//            $sms_id = Yii::$app->sms->send($phone, $message);
+//            $sms[] = ['phone' => $phone, 'sms_id' => $sms_id];
+//        }
+//
+//        foreach ($sms as $oneSms) {
+//            if (is_string($oneSms['sms_id']) && strlen($oneSms['sms_id']) > 0) {
+//                $status = Yii::$app->sms->getStatus($oneSms['sms_id'], $oneSms['phone']);
+//                $this->tester->seeRecord('data\RedisModel', ['sms_id' => $oneSms['sms_id'], 'phone' => $oneSms['phone']]);
+//            }
+//        }
+//    }
 
     public function testWriteAndReadMongoLog()
     {

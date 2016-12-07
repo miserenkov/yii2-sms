@@ -31,6 +31,13 @@ install:
   - composer self-update
   - composer global require "fxp/composer-asset-plugin:*"
   - composer install
-  - php vendor/codeception/codeception/codecept build
+  - vendor/bin/codecept build
 
-script: php vendor/codeception/codeception/codecept run
+script: vendor/bin/codecept run --coverage --coverage-xml
+
+after_success:
+  - vendor/bin/test-reporter
+
+addons:
+  code_climate:
+    repo_token: 306795868d2bec06339d9638c013d15c4d9b3404d013ad88d6a72185f584f8ad
