@@ -26,7 +26,7 @@ class m161203_204919_init extends Migration
             'phone' => $this->string(25)->notNull(),
             'message' => $this->string(800),
             'type' => $this->smallInteger(3)->defaultValue(0),
-            'send_time' => $this->integer(11)->unsigned()->notNull(),
+            'send_time' => $this->integer(11)->unsigned(),
             'cost' => $this->money(5,2)->unsigned(),
             'status' => $this->smallInteger(3),
             'error' => $this->smallInteger(3),

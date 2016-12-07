@@ -3,26 +3,24 @@
  * Created by PhpStorm.
  * Author: Misha Serenkov
  * Email: mi.serenkov@gmail.com
- * Date: 03.12.2016 19:19
+ * Date: 07.12.2016 23:18
  */
 
-namespace miserenkov\sms\logging\models;
+namespace data;
 
+use yii\db\ActiveRecord;
 
-use yii\mongodb\ActiveRecord;
-
-class Mongo extends ActiveRecord
+class SqlModel extends ActiveRecord
 {
     public static function getDb()
     {
         return \Yii::$app->sms->getLogger()->getConnection();
     }
 
-    public static function collectionName()
+    public static function tableName()
     {
-        return preg_replace('/[^A-z_]/', '', \Yii::$app->sms->getLogger()->getTableName());
+        return \Yii::$app->sms->getLogger()->getTableName();
     }
-
 
     public function rules()
     {
@@ -35,23 +33,6 @@ class Mongo extends ActiveRecord
             [['cost'], 'number'],
             [['operator'], 'string', 'max' => 50],
             [['region'], 'string', 'max' => 150],
-        ];
-    }
-
-    public function attributes()
-    {
-        return [
-            '_id',
-            'sms_id',
-            'phone',
-            'message',
-            'type',
-            'send_time',
-            'cost',
-            'status',
-            'error',
-            'operator',
-            'region',
         ];
     }
 }

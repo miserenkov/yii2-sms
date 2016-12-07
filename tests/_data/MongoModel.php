@@ -10,9 +10,14 @@ namespace data;
 
 class MongoModel extends \yii\mongodb\ActiveRecord
 {
+    public static function getDb()
+    {
+        return \Yii::$app->sms->getLogger()->getConnection();
+    }
+
     public static function collectionName()
     {
-        return 'sms_log';
+        return preg_replace('/[^A-z_]/', '', \Yii::$app->sms->getLogger()->getTableName());
     }
 
     public function attributes()

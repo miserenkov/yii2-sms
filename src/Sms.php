@@ -180,7 +180,7 @@ class Sms extends Object
             throw new \InvalidArgumentException('For sending sms, please, set phone number and message');
         }
 
-        $sms_id = $this->_client->sendMessage([
+        $response = $this->_client->sendMessage([
             'phones' => $numbers,
             'message' => $message,
             'id' => $this->smsIdGenerator(),
@@ -190,21 +190,23 @@ class Sms extends Object
             if (is_array($numbers)) {
                 foreach ($numbers as $number) {
                     $this->_logger->setRecord([
-                        'sms_id' => !$sms_id ? '' : $sms_id,
+                        'sms_id' => isset($response['id']) ? $response['id'] : '',
                         'phone' => $number,
                         'message' => $message,
+                        'error' => isset($response['error']) ? $response['error'] : 0,
                     ]);
                 }
             } else {
                 $this->_logger->setRecord([
-                    'sms_id' => !$sms_id ? '' : $sms_id,
+                    'sms_id' => isset($response['id']) ? $response['id'] : '',
                     'phone' => $numbers,
                     'message' => $message,
+                    'error' => isset($response['error']) ? $response['error'] : 0,
                 ]);
             }
         }
 
-        return $sms_id;
+        return isset($response['id']) ? $response['id'] : false;
     }
 
     /**

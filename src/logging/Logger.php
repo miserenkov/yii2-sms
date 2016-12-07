@@ -11,15 +11,11 @@ namespace miserenkov\sms\logging;
 
 use yii\base\InvalidConfigException;
 use yii\base\Object;
-use yii\db\BaseActiveRecord;
 use yii\di\Instance;
 use yii\db\Connection as SqlConnection;
-use yii\helpers\VarDumper;
 use yii\mongodb\Connection as MongoConnection;
-use yii\redis\Connection as RedisConnection;
 use miserenkov\sms\logging\models\Sql;
 use miserenkov\sms\logging\models\Mongo;
-use miserenkov\sms\logging\models\Redis;
 
 class Logger extends Object implements LoggerInterface
 {
@@ -29,13 +25,13 @@ class Logger extends Object implements LoggerInterface
     public $tableName = '{{%sms_log}}';
 
     /**
-     * @var array|string|\yii\db\Connection|\yii\mongodb\Connection|\yii\redis\Connection
+     * @var array|string|\yii\db\Connection|\yii\mongodb\Connection
      */
     public $connection = null;
 
     /**
      * Log table model
-     * @var Mongo|Redis|Sql
+     * @var Mongo|Sql
      */
     private $_model;
 
@@ -47,10 +43,8 @@ class Logger extends Object implements LoggerInterface
             $this->_model = Sql::class;
         } elseif ($this->connection instanceof MongoConnection) {
             $this->_model = Mongo::class;
-        } elseif ($this->connection instanceof RedisConnection) {
-            $this->_model = Redis::class;
         } else {
-            throw new InvalidConfigException('');
+            throw new InvalidConfigException("This connections doesn't support.");
         }
     }
 
@@ -70,8 +64,6 @@ class Logger extends Object implements LoggerInterface
     public function setRecord($data)
     {
         $record = new $this->_model();
-        $record->setDb($this->connection);
-        $record->setTableName($this->tableName);
         foreach ($data as $key => $value) {
             if ($record->hasAttribute($key)) {
                 $record->$key = $value;
@@ -88,10 +80,8 @@ class Logger extends Object implements LoggerInterface
     {
         if (!empty($sms_id)) {
             $record = new $this->_model();
-            $record->setDb($this->connection);
-            $record->setTableName($this->tableName);
             $record = $record->findOne(['sms_id' => $sms_id]);
-            if ($record instanceof BaseActiveRecord) {
+            if ($record) {
                 foreach ($data as $key => $value) {
                     if ($record->hasAttribute($key)) {
                         $record->$key = $value;
@@ -112,10 +102,8 @@ class Logger extends Object implements LoggerInterface
     {
         if (!empty($sms_id)) {
             $record = new $this->_model();
-            $record->setDb($this->connection);
-            $record->setTableName($this->tableName);
             $record = $record->findOne(['sms_id' => $sms_id, 'phone' => $phone]);
-            if ($record instanceof BaseActiveRecord) {
+            if ($record) {
                 foreach ($data as $key => $value) {
                     if ($record->hasAttribute($key)) {
                         $record->$key = $value;
