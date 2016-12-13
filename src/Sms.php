@@ -9,6 +9,7 @@
 namespace miserenkov\sms;
 
 
+use miserenkov\gearman\JobWorkload;
 use miserenkov\sms\client\SoapClient;
 use miserenkov\sms\logging\Logger;
 use miserenkov\sms\logging\LoggerInterface;
@@ -34,6 +35,9 @@ class Sms extends Object
     const TYPE_RESET_PASSWORD_MESSAGE = 2;
     const TYPE_LOGIN_MESSAGE = 3;
     const TYPE_NOTIFICATION_MESSAGE = 4;
+
+    const ACTION_QUEUE = 'queue';
+    const ACTION_REALLY = 'really';
     /**
      * @var string
      */
@@ -60,6 +64,7 @@ class Sms extends Object
     public $options = [
         'useHttps' => true,
         'throwExceptions' => false,
+        'useQueue' => false,
     ];
 
     /**
@@ -167,10 +172,11 @@ class Sms extends Object
      * @param string|array $numbers
      * @param string $message
      * @param int $type
+     * @param string $action
      * @return bool|string
      * @throws NotSupportedException|\InvalidArgumentException
      */
-    public function send($numbers, $message, $type = self::TYPE_DEFAULT_MESSAGE)
+    public function send($numbers, $message, $type = self::TYPE_DEFAULT_MESSAGE, $action = self::ACTION_QUEUE)
     {
         if (!in_array($type, $this->allowedTypes())) {
             throw new NotSupportedException("Message type \"$type\" doesn't support.");
@@ -178,6 +184,14 @@ class Sms extends Object
 
         if (empty($numbers) || (is_array($numbers) && count($numbers) === 0) || empty($message)) {
             throw new \InvalidArgumentException('For sending sms, please, set phone number and message');
+        }
+
+        if ($this->options['useQueue'] && $action === self::ACTION_QUEUE) {
+            return Yii::$app->gearman->getDispatcher()->background('smsSend', new JobWorkload([
+                'phones' => $numbers,
+                'message' => $message,
+                'type' => $type,
+            ]));
         }
 
         $response = $this->_client->sendMessage([

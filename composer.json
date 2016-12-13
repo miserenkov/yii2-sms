@@ -18,7 +18,8 @@
     "require": {
         "php": ">=5.5.0",
         "yiisoft/yii2": "^2.0.6",
-        "yiisoft/yii2-mongodb": "^2.1.2"
+        "yiisoft/yii2-mongodb": "^2.1.2",
+        "miserenkov/yii2-gearman": "dev-master"
     },
     "autoload": {
         "psr-4": {
