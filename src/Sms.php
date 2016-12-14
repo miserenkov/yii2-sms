@@ -61,11 +61,7 @@ class Sms extends Object
     /**
      * @var array
      */
-    public $options = [
-        'useHttps' => true,
-        'throwExceptions' => false,
-        'useQueue' => false,
-    ];
+    public $options = [];
 
     /**
      * @var array|false
@@ -81,6 +77,15 @@ class Sms extends Object
      * @var LoggerInterface|null
      */
     protected $_logger = null;
+
+    /**
+     * @var array
+     */
+    private $_options = [
+        'useHttps' => true,
+        'throwExceptions' => false,
+        'useQueue' => false,
+    ];
 
     /**
      * Allowed gateways
@@ -122,13 +127,17 @@ class Sms extends Object
             throw new InvalidConfigException("Gateway \"$this->gateway\" doesn't support.");
         }
 
+        if (is_array($this->options)) {
+            $this->_options = array_merge($this->_options, $this->options);
+        }
+
         if ($this->_client === null) {
             $this->_client = Yii::createObject(SoapClient::class, [
                 $this->gateway,
                 $this->login,
                 $this->password,
                 $this->senderName,
-                $this->options,
+                $this->_options,
             ]);
         }
 
@@ -186,7 +195,7 @@ class Sms extends Object
             throw new \InvalidArgumentException('For sending sms, please, set phone number and message');
         }
 
-        if ($this->options['useQueue'] && $action === self::ACTION_QUEUE) {
+        if ($this->_options['useQueue'] && $action === self::ACTION_QUEUE) {
             return Yii::$app->gearman->getDispatcher()->background('smsSend', new JobWorkload([
                 'phones' => $numbers,
                 'message' => $message,
