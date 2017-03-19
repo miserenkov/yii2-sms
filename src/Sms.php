@@ -10,6 +10,8 @@ namespace miserenkov\sms;
 
 
 use miserenkov\sms\client\SoapClient;
+use miserenkov\sms\logging\Logger;
+use miserenkov\sms\logging\LoggerInterface;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\base\Object;
@@ -55,12 +57,25 @@ class Sms extends Object
     /**
      * @var array
      */
-    public $options = [];
+    public $options = [
+        'useHttps' => true,
+        'throwExceptions' => false,
+    ];
+
+    /**
+     * @var array|false
+     */
+    public $logging = false;
 
     /**
      * @var SoapClient
      */
     protected $_client = null;
+
+    /**
+     * @var LoggerInterface|null
+     */
+    protected $_logger = null;
 
     /**
      * Allowed gateways
@@ -111,6 +126,20 @@ class Sms extends Object
                 $this->options,
             ]);
         }
+
+        if ($this->logging && $this->_logger === null) {
+            if (
+                !isset($this->logging['connection']) || empty($this->logging['connection']) ||
+                (is_array($this->logging['connection']) && count($this->logging['connection']) === 0)
+            ) {
+                throw new InvalidConfigException('Logging connection must be set.');
+            }
+            if (!isset($this->logging['class']) || empty($this->logging['class'])) {
+                $this->logging['class'] = Logger::class;
+            }
+
+            $this->_logger = Yii::createObject($this->logging);
+        }
     }
 
     /**
@@ -147,15 +176,37 @@ class Sms extends Object
             throw new NotSupportedException("Message type \"$type\" doesn't support.");
         }
 
-        if (empty($numbers) || count($numbers) === 0 || empty($message)) {
+        if (empty($numbers) || (is_array($numbers) && count($numbers) === 0) || empty($message)) {
             throw new \InvalidArgumentException('For sending sms, please, set phone number and message');
         }
 
-        return $this->_client->sendMessage([
+        $response = $this->_client->sendMessage([
             'phones' => $numbers,
             'message' => $message,
             'id' => $this->smsIdGenerator(),
         ]);
+
+        if ($this->_logger instanceof LoggerInterface) {
+            if (is_array($numbers)) {
+                foreach ($numbers as $number) {
+                    $this->_logger->setRecord([
+                        'sms_id' => isset($response['id']) ? $response['id'] : '',
+                        'phone' => $number,
+                        'message' => $message,
+                        'error' => isset($response['error']) ? $response['error'] : 0,
+                    ]);
+                }
+            } else {
+                $this->_logger->setRecord([
+                    'sms_id' => isset($response['id']) ? $response['id'] : '',
+                    'phone' => $numbers,
+                    'message' => $message,
+                    'error' => isset($response['error']) ? $response['error'] : 0,
+                ]);
+            }
+        }
+
+        return isset($response['id']) ? $response['id'] : false;
     }
 
     /**
@@ -173,6 +224,21 @@ class Sms extends Object
             throw new \InvalidArgumentException('For getting sms status, please, set id and phone');
         }
 
-        return $this->_client->getMessageStatus($id, $phone, $all);
+        $data = $this->_client->getMessageStatus($id, $phone, $all);
+
+        if ($this->_logger instanceof LoggerInterface) {
+            $this->_logger->updateRecordBySmsIdAndPhone($id, $phone, $data);
+        }
+
+        return $data;
+    }
+
+    public function getLogger()
+    {
+        if ($this->_logger instanceof LoggerInterface) {
+            return $this->_logger;
+        }
+
+        return false;
     }
 }

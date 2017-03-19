@@ -91,7 +91,7 @@ Yii::$app->sms->send($phones, $message);
  *      status_message   - status message
  *      err              - error code
  *      err_message      - error message
- *      time             - date of send
+ *      send_time        - timestamp of send
  *      cost             - message cost
  *      operator         - recipient operator
  *      region           - recipient region

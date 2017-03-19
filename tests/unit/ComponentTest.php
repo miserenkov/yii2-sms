@@ -6,10 +6,8 @@
  * Email: mi.serenkov@gmail.com
  * Date: 30.11.2016 11:02
  */
-class SmsTest extends \yii\codeception\TestCase
+class ComponentTest extends Codeception\Test\Unit
 {
-    public $appConfig = '@tests/unit/_config.php';
-
     public function testEmptyLoginOrPassword()
     {
         $caught = false;
@@ -198,8 +196,8 @@ class SmsTest extends \yii\codeception\TestCase
         $this->assertArrayHasKey('err_message', $status);
         $this->assertTrue(is_string($status['err_message']));
 
-        $this->assertArrayHasKey('time', $status);
-        $this->assertTrue(is_int($status['time']));
+        $this->assertArrayHasKey('send_time', $status);
+        $this->assertTrue(is_int($status['send_time']));
 
         $this->assertArrayHasKey('cost', $status);
         $this->assertTrue(is_double($status['cost']));
@@ -209,5 +207,62 @@ class SmsTest extends \yii\codeception\TestCase
 
         $this->assertArrayHasKey('region', $status);
         $this->assertTrue(is_string($status['region']));
+    }
+
+    public function testFailedGetStatus()
+    {
+        $caught = false;
+        try {
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'login' => 'phpunit',
+                'password' => '85af727fd022d3a13e7972fd6a418582',
+                'senderName' => 'PHPUnit',
+                'options' => [
+                    'throwExceptions' => true,
+                ],
+            ]);
+            Yii::$app->sms->getStatus('iVa6QswMhPYoEDci7-gnOS2QmCFBZAxZmf6hge95', null);
+        } catch (\InvalidArgumentException $e) {
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, 'Caught invalid argument exception');
+    }
+
+    public function testFailedSendSMS()
+    {
+        $caught = false;
+        try {
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'login' => 'phpunit',
+                'password' => '85af727fd022d3a13e7972fd6a418582',
+                'senderName' => 'PHPUnit',
+            ]);
+            $sms_id = Yii::$app->sms->send('380501909090', null);
+        } catch (\InvalidArgumentException $e) {
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, 'Caught invalid argument exception');
+    }
+
+    public function testSendNotSupportedSMSType()
+    {
+        $caught = false;
+        try {
+            Yii::$app->set('sms', [
+                'class' => '\miserenkov\sms\Sms',
+                'login' => 'phpunit',
+                'password' => '85af727fd022d3a13e7972fd6a418582',
+                'senderName' => 'PHPUnit',
+            ]);
+            $sms_id = Yii::$app->sms->send('380501909090', 'Verify code: '.rand(), 9);
+        } catch (\yii\base\NotSupportedException $e) {
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, 'Caught not supported exception');
     }
 }

@@ -2,7 +2,7 @@
     "name": "miserenkov/yii2-sms",
     "description": "Yii2 component for sending SMS messages",
     "keywords": ["yii2", "sms", "smsc", "smsc.ru", "smsc.ua"],
-    "type": "yii2-extension",
+    "type": "yii2-component",
     "license": "MIT",
     "support": {
         "email": "mi.serenkov@gmail.com",
@@ -17,7 +17,8 @@
     ],
     "require": {
         "php": ">=5.5.0",
-        "yiisoft/yii2": "^2.0"
+        "yiisoft/yii2": "^2.0.6",
+        "yiisoft/yii2-mongodb": "^2.1.2"
     },
     "autoload": {
         "psr-4": {
@@ -26,6 +27,6 @@
     },
     "require-dev": {
         "codeception/codeception": "^2.2",
-        "yiisoft/yii2-codeception": "^2.0"
+        "codeclimate/php-test-reporter": "dev-master"
     }
 }
