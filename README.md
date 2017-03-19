@@ -59,6 +59,23 @@ To use sender, you should configure it in the application configuration like the
 \miserenkov\sms\Sms::GATEWAY_WORLD,       // smscentre.com
 ```
 
+#### Messages logging
+```php
+'components' => [
+    ...
+    'sms' => [
+        ...
+        'logging' => [
+            'class' => '',          // optionaly, default to miserenkov\sms\logging\Logger
+            'connection' => 'db'    // string or array to database connection
+            'tableName' => ''       // database table name, optionaly, default to {{%sms_log}}
+        ],
+        ...
+    ],
+    ...
+],
+```
+
 ## Basic usages
 
 #### Get balance
