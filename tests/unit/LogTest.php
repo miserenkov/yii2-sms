@@ -102,7 +102,7 @@ class LogTest extends \Codeception\Test\Unit
         Yii::$app->clear('sms');
     }
 
-    public function testPgSqlConnections()
+    public function testPgsqlConnections()
     {
         $db = [
             'class' => '\yii\db\Connection',
@@ -244,7 +244,7 @@ class LogTest extends \Codeception\Test\Unit
         }
     }
 
-    public function testWriteAndReadPgSqlLog()
+    public function testWriteAndReadPgsqlLog()
     {
         $sms = [];
         Yii::$app->set('pgsql', [

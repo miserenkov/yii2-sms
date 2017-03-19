@@ -31,13 +31,4 @@ install:
   - composer install
   - vendor/bin/codecept build
 
-script: vendor/bin/codecept run --coverage --coverage-xml
-
-after_success:
-  - mkdir build && mkdir build/logs
-  - cp tests/_output/coverage.xml build/logs/clover.xml
-  - vendor/bin/test-reporter
-
-addons:
-  code_climate:
-    repo_token: 306795868d2bec06339d9638c013d15c4d9b3404d013ad88d6a72185f584f8ad
+script: vendor/bin/codecept run
