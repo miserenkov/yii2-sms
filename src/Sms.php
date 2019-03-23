@@ -14,10 +14,10 @@ use miserenkov\sms\logging\Logger;
 use miserenkov\sms\logging\LoggerInterface;
 use Yii;
 use yii\base\InvalidConfigException;
-use yii\base\Object;
+use yii\base\BaseObject;
 use yii\base\NotSupportedException;
 
-class Sms extends Object
+class Sms extends BaseObject
 {
     /**
      * Api gateways

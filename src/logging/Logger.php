@@ -10,14 +10,14 @@ namespace miserenkov\sms\logging;
 
 
 use yii\base\InvalidConfigException;
-use yii\base\Object;
+use yii\base\BaseObject;
 use yii\di\Instance;
 use yii\db\Connection as SqlConnection;
 use yii\mongodb\Connection as MongoConnection;
 use miserenkov\sms\logging\models\Sql;
 use miserenkov\sms\logging\models\Mongo;
 
-class Logger extends Object implements LoggerInterface
+class Logger extends BaseObject implements LoggerInterface
 {
     /**
      * @var string
