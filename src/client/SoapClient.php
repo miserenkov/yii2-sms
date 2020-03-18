@@ -143,7 +143,7 @@ class SoapClient extends \SoapClient implements ClientInterface
 
             $response = (array) $response->sendresult;
 
-            if (!isset($response['error'])) {
+            if (!isset($response['error']) || $response['error'] === '0') {
                 return ['id' => $response['id']];
             } else {
                 \Yii::error(SendException::getErrorString((int) $response['error']), self::class);
