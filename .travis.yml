@@ -15,7 +15,7 @@ before_install:
   - mysql -u root -e "CREATE DATABASE travis_test;"
   - psql -c "CREATE DATABASE travis_test;" -U postgres
   - pecl install -f mongodb-1.2.0
-  - mongo travis_test --eval 'db.createUser("travis", "test");'
+  - mongo travis_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
 
 install:
   - composer self-update
