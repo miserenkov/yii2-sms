@@ -1,18 +1,10 @@
 language: php
 php:
-- 5.5
 - 5.6
 - 7.0
 - 7.1
-- nightly
-- hhvm-3.3
-- hhvm-3.6
-
-matrix:
-  allow_failures:
-    - php: hhvm-3.3
-    - php: hhvm-3.6
-    - php: nightly
+- 7.2
+- 7.3
 
 services:
   - mongodb
@@ -23,7 +15,7 @@ before_install:
   - mysql -u root -e "CREATE DATABASE travis_test;"
   - psql -c "CREATE DATABASE travis_test;" -U postgres
   - pecl install -f mongodb-1.2.0
-  - mongo travis_test --eval 'db.addUser("travis", "test");'
+  - mongo travis_test --eval 'db.createUser("travis", "test");'
 
 install:
   - composer self-update
